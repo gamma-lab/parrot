@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% set page_title = domain.domain_name %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-lg-3 col-md-6 col-sm-6">
+		<div class="card card-stats">
+			<div class="card-header" data-background-color="blue">
+				<i class="material-icons">local_library</i>
+			</div>
+			<div class="card-content">
+				<p class="category">Intents</p>
+				<h3 class="card-title"><a href="{{ url_for('intent.all_intents') }}">{{ domain.intents | length }}</a></h3>
+			</div>
+			<!-- <div class="card-footer">
+				<div class="stats">
+					<a href="{{ url_for('intent.all_intents') }}">Intent List</a>
+				</div>
+			</div> -->
+		</div>
+	</div>
+
+	<div class="col-lg-3 col-md-6 col-sm-6">
+		<div class="card card-stats">
+			<div class="card-header" data-background-color="rose">
+				<i class="material-icons">touch_app</i>
+			</div>
+			<div class="card-content">
+				<p class="category">Actions</p>
+				<h3 class="card-title"><a href="{{ url_for('action.all_actions') }}">{{ domain.actions | length }}</a></h3>
+			</div>
+			<!-- <div class="card-footer">
+				<div class="stats">
+					<a href="{{ url_for('action.all_actions') }}">Action List</a>
+				</div>
+			</div> -->
+		</div>
+	</div>
+
+  <div class="col-lg-3 col-md-6 col-sm-6">
+		<div class="card card-stats">
+			<div class="card-header" data-background-color="green">
+				<i class="material-icons">library_books</i>
+			</div>
+			<div class="card-content">
+				<p class="category">Stories</p>
+				<h3 class="card-title"><a href="{{ url_for('action.all_actions') }}">{{ domain.stories | length }}</a></h3>
+			</div>
+			<!-- <div class="card-footer">
+				<div class="stats">
+					<a href="{{ url_for('action.all_actions') }}">Story List</a>
+				</div>
+			</div> -->
+		</div>
+	</div>
+</div>
+<div class="row">
+  <div class="col-sm-12">
+    <div class="card">
+      <div class="card-content">
+        <a class="btn btn-info" href="{{ url_for('api.export_domain', domain_id=domain.id) }}">
+						<span class="btn-label">
+							<i class="material-icons">cloud_download</i>
+						</span>
+						Export
+				</a>
+	    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript">
+
+  </script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% set active_page = "" %}
+{% set active_subpage = "" %}
+{% set page_title = "Get Started" %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-md-8 col-md-offset-2 register-page">
+    <div class="card card-signup">
+      <h2 class="card-title text-center">Get Started</h2>
+      <div class="row">
+          <div class="col-md-12">
+              <div class="card-content">
+                  <!-- <div class="info info-horizontal">
+                      <div class="icon icon-rose">
+                          <i class="material-icons">file_copy</i>
+                      </div>
+                      <div class="description">
+                          <h4 class="info-title">Parrot helps you prepare the following files needed for developing contextual AI assistants with the open source Rasa Stack</h4>
+                      </div>
+                  </div>
+
+                  <div class="info info-horizontal">
+                      <div class="icon icon-primary">
+                          <i class="material-icons">flash_on</i>
+                      </div>
+                      <div class="description">
+                          <h4 class="info-title">Boost your development productivity with Parrot’s easy to use interface</h4>
+                      </div>
+                  </div>
+
+                  <div class="info info-horizontal">
+                      <div class="icon icon-info">
+                          <i class="material-icons">save_alt</i>
+                      </div>
+                      <div class="description">
+                          <h4 class="info-title">Streamline your development process by saving your progress as you build and train</h4>
+                      </div>
+                  </div> -->
+                  <div class="footer text-center">
+                      <a href="{{ url_for('domain.add_domain') }}" class="btn btn-primary btn-round">Create Your Domain</a>
+                      <a href="{{ url_for('domain.add_default_domain') }}" class="btn btn-success btn-round">Load Rasa Starter Example</a>
+                  </div>
+              </div>
+          </div>
+          <div class="col-md-5">
+              <!-- <div class="social text-center">
+                  <button class="btn btn-just-icon btn-round btn-twitter">
+                      <i class="fa fa-twitter"></i>
+                  </button>
+                  <button class="btn btn-just-icon btn-round btn-dribbble">
+                      <i class="fa fa-dribbble"></i>
+                  </button>
+                  <button class="btn btn-just-icon btn-round btn-facebook">
+                      <i class="fa fa-facebook"> </i>
+                  </button>
+                  <h4> or be classical </h4>
+              </div> -->
+
+              <form class="form" method="" action="">
+                  <!-- <div class="card-content">
+                      <div class="input-group">
+                          <span class="input-group-addon">
+                              <i class="material-icons">face</i>
+                          </span>
+                          <input type="text" class="form-control" placeholder="First Name...">
+                      </div>
+
+                      <div class="input-group">
+                          <span class="input-group-addon">
+                              <i class="material-icons">email</i>
+                          </span>
+                          <input type="text" class="form-control" placeholder="Email...">
+                      </div>
+
+                      <div class="input-group">
+                          <span class="input-group-addon">
+                              <i class="material-icons">lock_outline</i>
+                          </span>
+                          <input type="password" placeholder="Password..." class="form-control" />
+                      </div>
+
+                      <div class="checkbox">
+                          <label>
+                              <input type="checkbox" name="optionsCheckboxes" checked>
+                              I agree to the <a href="#something">terms and conditions</a>.
+                          </label>
+                      </div>
+                  </div> -->
+                  <!-- <div class="footer text-center">
+                      <a href="#pablo" class="btn btn-primary btn-round">Get Started</a>
+                  </div> -->
+              </form>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript">
+
+  </script>
+{% endblock %}

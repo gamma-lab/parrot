@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% set active_page = "domainMenu" %}
+{% if action == 'create' %}
+  {% set active_subpage = "domain-add" %}
+  {% set page_title = "Add New Domain" %}
+{% else %}
+  {% set active_subpage = "domain-all" %}
+  {% set page_title = "Edit Domain" %}
+{% endif %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+        <form id="new-domain-form" class="form-horizontal" action="{% if action == 'create' %}{{ url_for('domain.add_domain') }}{% else %}{{ url_for('domain.edit_domain', domain_id=domain.id) }}{% endif %}" method="post">
+            <div class="card-header card-header-text" data-background-color="blue">
+                <h4 class="card-title">{% if action == 'create' %}New Domain{% else %}Edit Domain{% endif %}</h4>
+            </div>
+
+            <div class="card-content">
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Domain Name</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <input class="form-control"
+                                type="text"
+                                name="domain_name"
+                                required="true"
+                                placeholder="Required"
+                                value="{% if action == 'edit' %}{{ domain.domain_name }}{% endif %}"
+                             />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Language</label>
+                    <div class="col-sm-7">
+                      <select class="selectpicker" data-style="select-with-transition" title="Choose Language" data-size="2" required="true" name="language">
+                        <option disabled> Choose language</option>
+                        <option value="English" selected> English</option>
+                      </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Domain Description</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <textarea class="form-control"
+                                name="description"
+                                placeholder="Required"
+                                rows="4"
+                                required="true"
+                             >{% if action == 'edit' %}{{ domain.description }}{% endif %}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center">
+                <button type="submit" class="btn btn-info btn-fill">{% if action == 'create' %}Create{% else %}Update{% endif %}</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript">
+
+    function setFormValidation(id){
+      $(id).validate({
+        errorPlacement: function(error, element) {
+          $(element).closest('div').addClass('has-error');
+        }
+      });
+    }
+
+    $(document).ready(function(){
+      setFormValidation('#new-domain-form');
+    });
+  </script>
+{% endblock %}

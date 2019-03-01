@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% set active_page = "intents" %}
+{% if action == 'create' %}
+  {% set page_title = "Add New Intent" %}
+{% else %}
+  {% set page_title = "Edit Intent" %}
+{% endif %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+        <form id="intent-form" class="form-horizontal" action="{% if action == 'create' %}{{ url_for('intent.add_intent') }}{% else %}{{ url_for('intent.edit_intent', intent_id=intent.id) }}{% endif %}" method="post">
+            <div class="card-header card-header-text" data-background-color="blue">
+                <h4 class="card-title">{% if action == 'create' %}New Intent{% else %}Edit Intent{% endif %}</h4>
+            </div>
+
+            <div class="card-content">
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Intent Name</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <input class="form-control"
+                                type="text"
+                                name="intent_name"
+                                required="true"
+                                placeholder="Required"
+                                value="{% if action == 'edit' %}{{ intent.intent_name }}{% endif %}"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">User Says</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <input class="form-control"
+                                type="text"
+                                name="user_says_input"
+                                placeholder='Input the sentence and press "Enter" to save'
+                            />
+                            <input type="hidden" id="user_says" name="user_says" value="{% if intent %}{{ intent.user_says }}{% endif %}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center">
+                <button type="submit" class="btn btn-info btn-fill">{% if action == 'create' %}Create{% else %}Update{% endif %}</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript">
+
+    function setFormValidation(id){
+      $(id).validate({
+        errorPlacement: function(error, element) {
+          $(element).closest('div').addClass('has-error');
+        }
+      });
+    }
+
+    $(document).ready(function(){
+      setFormValidation('#intent-form');
+    });
+
+    $('#intent-form input').keydown(function (e) {
+      if (e.keyCode == 13) {
+          e.preventDefault();
+          console.log(e.target.value);
+          if (e.target.name == 'user_says_input') {
+            // save to tags
+            $('#user_says').tagsinput('add', e.target.value);
+            e.target.value = '';
+          }
+          return false;
+      }
+    });
+
+    $('#user_says').tagsinput({
+      trimValue: true,
+      allowDuplicates: false,
+      confirmKeys: [13],
+      delimiter: ';',
+      tagClass: 'sentence',
+      splitOn: ';'
+    });
+  </script>
+{% endblock %}
