@@ -1,29 +1,13 @@
-# parrot
-An intelligent conversation engineering tool
+<img src="https://raw.githubusercontent.com/gamma-lab/parrot/master/app/static/assets/img/logo-ny.svg?sanitize=true" height="200">
+Parrot is an intelligent conversation engineering tool.
 
-## Table of Contents
+## Quick Start
 
-* [Quick Start](#quick-start)
-* [Migration](#migration)
-
-## Quick start
-
-Quick start:
-
-- Create virtual environment `virtualenv venv`.
-- Load the venv `source venv`.
-- Install python packages `pip install -r requirement`.
-- Add environment variable
+- Setup the virtual environment and install required packages (tested with Python 3.6):
   ```
-  export SECRET_KEY=<a long string>
-  export FLASK_APP=app
-  export FLASK_ENV=development
+  virtualenv -p python3.6 venv
+  source venv/bin/activate
+  pip install -r requirements.txt
   ```
 - Initialize sqlite database `flask init-db`
-- Run `flask run`.
-
-## Migration
-
-- If the schemas of the data models have been changed, run `flask db migrate -m "short message to describe what has been changed"`
-- Run `flask db upgrade` to apply the latest schemas to the database
-- Run `flask db downgrade` to apply previous schemas to the database
+- Run `flask run` and go to http://127.0.0.1:5000/ to use Parrot
