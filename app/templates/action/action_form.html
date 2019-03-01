@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% set active_page = "actions" %}
+{% if action == 'create' %}
+  {% set page_title = "Add New Action" %}
+{% else %}
+  {% set page_title = "Edit Action" %}
+{% endif %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+        <form id="action-form" class="form-horizontal" action="{% if action == 'create' %}{{ url_for('action.add_action') }}{% else %}{{ url_for('action.edit_action', action_id=_action.id) }}{% endif %}" method="post">
+            <div class="card-header card-header-text" data-background-color="blue">
+                <h4 class="card-title">{% if action == 'create' %}New Action{% else %}Edit Action{% endif %}</h4>
+            </div>
+
+            <div class="card-content">
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Action Name</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <input class="form-control"
+                                type="text"
+                                name="action_name"
+                                required="true"
+                                placeholder="Required"
+                                value="{% if action == 'edit' %}{{ _action.action_name }}{% endif %}"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Agent Responses</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <input class="form-control"
+                                type="text"
+                                name="agent_responses_input"
+                                placeholder='Input the sentence and press "Enter" to save'
+                            />
+                            <input type="hidden" id="agent_responses" name="agent_responses" value="{% if _action %}{{ _action.agent_responses }}{% endif %}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center">
+                <button type="submit" class="btn btn-info btn-fill">{% if action == 'create' %}Create{% else %}Update{% endif %}</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript">
+
+    function setFormValidation(id){
+      $(id).validate({
+        errorPlacement: function(error, element) {
+          $(element).closest('div').addClass('has-error');
+        }
+      });
+    }
+
+    $(document).ready(function(){
+      setFormValidation('#action-form');
+    });
+
+    $('#action-form input').keydown(function (e) {
+      if (e.keyCode == 13) {
+          e.preventDefault();
+          if (e.target.name == 'agent_responses_input') {
+            // save to tags
+            $('#agent_responses').tagsinput('add', e.target.value);
+            e.target.value = '';
+          }
+          return false;
+      }
+    });
+
+    $('#agent_responses').tagsinput({
+      trimValue: true,
+      allowDuplicates: false,
+      confirmKeys: [13],
+      delimiter: ';',
+      tagClass: 'sentence',
+      splitOn: ';'
+    });
+  </script>
+{% endblock %}

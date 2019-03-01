@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% set active_page = "stories" %}
+{% if action == 'create' %}
+  {% set page_title = "Add New Story" %}
+{% else %}
+  {% set page_title = "Edit Story" %}
+{% endif %}
+
+{% block page_content %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="card">
+        <form id="story-form" class="form-horizontal" action="{% if action == 'create' %}{{ url_for('story.add_story') }}{% else %}{{ url_for('story.edit_story', story_id=story.id) }}{% endif %}" method="post">
+            <div class="card-header card-header-text" data-background-color="blue">
+                <h4 class="card-title">{% if action == 'create' %}New Story{% else %}Edit story{% endif %}</h4>
+            </div>
+
+            <div class="card-content">
+                <div class="row">
+                    <label class="col-sm-2 label-on-left">Story Name</label>
+                    <div class="col-sm-7">
+                        <div class="form-group label-floating">
+                            <label class="control-label"></label>
+                            <input class="form-control"
+                                type="text"
+                                name="story_name"
+                                required="true"
+                                placeholder="Required"
+                                value="{% if action == 'edit' %}{{ story.story_name }}{% endif %}"
+                            />
+                        </div>
+                        <input type="hidden" id="story_list" name="story_list"/>
+                    </div>
+                </div>
+
+                <div class="row" style="padding-top: 20px;">
+                  <div class="col-lg-6 col-md-12">
+                    <div class="col-md-12">
+                      <h4>Intents</h4>
+                      <div class="dnd-box">
+                        <ul class="sortable-list connectList dnd-list" id="intent" style="height: 300px; overflow: scroll;">
+                        {% for intent in intents %}
+                          <li class="warning-element" id="intent-{{ intent.id }}">
+                            {{ intent.intent_name }}
+                          </li>
+                        {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="col-md-12">
+                      <h4>Actions</h4>
+                      <div class="dnd-box">
+                        <ul class="sortable-list connectList dnd-list" id="action" style="height: 300px; overflow: scroll;">
+                        {% for _action in actions %}
+                          <li class="success-element" id="action-{{ _action.id }}">
+                            {{ _action.action_name }}
+                          </li>
+                        {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-md-12">
+                    <div class="col-md-12">
+                      <h4>Story</h4>
+                      <div class="dnd-box" style="min-height: 705px">
+                        <ul class="sortable-list connectList dnd-list" id="story" style="min-height: 675px; overflow: scroll;">
+                          {% if action == 'edit' %}
+                            {% for story_line in story.story_lines %}
+                              <li class="warning-element" id="intent-{{ story_line.intent[0].id }}">
+                                {{ story_line.intent[0].intent_name }}
+                                <i class="material-icons pull-right remove">delete_forever</i>
+                              </li>
+                              {% for _action in story_line.actions %}
+                              <li class="success-element" id="action-{{ _action.id }}">
+                                {{ _action.action_name }}
+                                <i class="material-icons pull-right remove">delete_forever</i>
+                              </li>
+                              {% endfor %}
+                            {% endfor %}
+                          {% endif %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+
+            <div class="card-footer text-center">
+                <button type="submit" class="btn btn-info btn-fill">{% if action == 'create' %}Create{% else %}Update{% endif %}</button>
+            </div>
+        </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script type="text/javascript">
+
+    function setFormValidation(id){
+      $(id).validate({
+        errorPlacement: function(error, element) {
+          $(element).closest('div').addClass('has-error');
+        }
+      });
+    }
+
+    function validateStory(id) {
+      var story = $(id).sortable( "toArray" );
+      if (story.length) {
+        // if the first is not an intent
+        if (story[0].startsWith('intent-')) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    }
+
+    $(document).ready(function(){
+      setFormValidation('#story-form');
+
+      $("#intent, #action").sortable({
+          connectWith: ".connectList",
+          helper: function (e, li) {
+              this.copyHelper = li.clone().insertAfter(li);
+              $(this).data('copied', false);
+              return li.clone();
+          },
+          stop: function () {
+              var copied = $(this).data('copied');
+              if (!copied) {
+                  this.copyHelper.remove();
+              }
+              this.copyHelper = null;
+          },
+          receive: function (event, ui) {
+            // cannot move items between action and intent
+            $(ui.sender).sortable('cancel');
+          }
+      }).disableSelection();
+
+      $("#story").sortable({
+          receive: function (e, ui) {
+            if (validateStory('#story')) {
+              ui.sender.data('copied', true);
+              var item = ui.item;
+              item.append('<i class="material-icons pull-right remove">delete_forever</i>')
+            } else {
+              $(ui.sender).sortable('cancel');
+            }
+          },
+          update: function( event, ui ) {
+              if (validateStory('#story')) {
+                var story = $('#story').sortable( "toArray" );
+                $('#story_list').val(story.join(';'));
+              } else {
+                if (ui.sender) {
+                  $(ui.sender).sortable('cancel');
+                } else {
+                  $(event.target).sortable('cancel');
+                }
+              }
+          }
+      });
+
+      $("#story").on('click', '.remove', function(e) {
+        $(e.target).parent().remove();
+        var story = $( "#story" ).sortable( "toArray" );
+        $('#story_list').val(story.join(';'));
+      });
+    });
+  </script>
+{% endblock %}

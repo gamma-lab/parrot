@@ -1,0 +1,109 @@
+{
+  "intents": [
+    {
+      "intent_name": "greet",
+      "user_says": [
+        "hey", "hello", "hi", "good morning", "good evening", "hey there"]
+    },
+    {
+      "intent_name": "goodbye",
+      "user_says": ["bye", "goodbye", "see you around", "see you later"]
+    },
+    {
+      "intent_name": "mood_affirm",
+      "user_says": ["yes", "indeed", "of course", "that sounds good", "correct"]
+    },
+    {
+      "intent_name": "mood_deny",
+      "user_says": ["no", "never", "I don't think so", "don't like that", "no way", "not really"]
+    },
+    {
+      "intent_name": "mood_great",
+      "user_says": ["perfect", "very good", "great", "amazing", "wonderful", "I am feeling very good", "I am great", "I'm good"]
+    },
+    {
+      "intent_name": "mood_unhappy",
+      "user_says": ["sad", "very sad", "unhappy", "bad", "very bad", "awful", "terrible", "not very good", "extremely sad", "so sad"]
+    }
+  ],
+  "actions": [
+    {
+      "action_name": "utter_greet",
+      "agent_responses": ["Hey! How are you?"]
+    },
+    {
+      "action_name": "utter_cheer_up",
+      "agent_responses": ["Here is something to cheer you up"]
+    },
+    {
+      "action_name": "utter_did_that_help",
+      "agent_responses": ["Did that help you?"]
+    },
+    {
+      "action_name": "utter_happy",
+      "agent_responses": ["Great carry on!"]
+    },
+    {
+      "action_name": "utter_goodbye",
+      "agent_responses": ["Bye"]
+    }
+  ],
+  "stories": [
+    {
+      "story_name": "happy path",
+      "story_lines": [
+        {
+          "intent_name": "greet",
+          "action_names": ["utter_greet"]
+        },
+        {
+          "intent_name": "mood_great",
+          "action_names": ["utter_happy"]
+        }
+      ]
+    },
+    {
+      "story_name": "sad path 1",
+      "story_lines": [
+        {
+          "intent_name": "greet",
+          "action_names": ["utter_greet"]
+        },
+        {
+          "intent_name": "mood_unhappy",
+          "action_names": ["utter_cheer_up", "utter_did_that_help"]
+        },
+        {
+          "intent_name": "mood_affirm",
+          "action_names": ["utter_happy"]
+        }
+      ]
+    },
+    {
+      "story_name": "sad path 2",
+      "story_lines": [
+        {
+          "intent_name": "greet",
+          "action_names": ["utter_greet"]
+        },
+        {
+          "intent_name": "mood_unhappy",
+          "action_names": ["utter_cheer_up", "utter_did_that_help"]
+        },
+        {
+          "intent_name": "mood_deny",
+          "action_names": ["utter_goodbye"]
+        }
+      ]
+    },
+    {
+      "story_name": "say goodbye",
+      "story_lines": [
+        {
+          "intent_name": "goodbye",
+          "action_names": ["utter_goodbye"]
+        }
+      ]
+    }
+  ]
+}
