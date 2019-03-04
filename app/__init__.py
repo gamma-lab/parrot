@@ -14,8 +14,7 @@ def create_app(config_name='default'):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
 
-    app.config.from_object(config[config_name])
-
+    app.config.from_object('app.config.DevelopmentConfig')
     # ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)
