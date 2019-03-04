@@ -22,9 +22,12 @@ def info_action(action_id):
 @action.route('/add', methods=['GET', 'POST'])
 def add_action():
     if request.method == 'POST':
-        action = Action(action_name=request.form.get('action_name'),
-                        agent_responses=request.form.get('agent_responses'),
-                        domain_id=current_user.current_domain_id)
+        action = Action(
+            action_name=request.form.get('action_name'),
+            agent_responses=request.form.get('agent_responses') + (
+                ';' + request.form.get('agent_responses_input')
+                ) if request.form.get('agent_responses_input') else '',
+            domain_id=current_user.current_domain_id)
         db.session.add(action)
         try:
             db.session.commit()
@@ -41,7 +44,9 @@ def edit_action(action_id):
     _action = Action.query.get_or_404(action_id)
     if request.method == 'POST':
         _action.action_name = request.form.get('action_name')
-        _action.agent_responses = request.form.get('agent_responses')
+        _action.agent_responses = request.form.get('agent_responses') + (
+            ';' + request.form.get('agent_responses_input')
+            ) if request.form.get('agent_responses_input') else ''
         db.session.add(_action)
         try:
             db.session.commit()
