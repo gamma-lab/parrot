@@ -22,9 +22,12 @@ def info_intent(intent_id):
 @intent.route('/add', methods=['GET', 'POST'])
 def add_intent():
     if request.method == 'POST':
-        intent = Intent(intent_name=request.form.get('intent_name'),
-                        user_says=request.form.get('user_says'),
-                        domain_id=current_user.current_domain_id)
+        intent = Intent(
+            intent_name=request.form.get('intent_name'),
+            user_says=request.form.get('user_says') + (
+                ';' + request.form.get('user_says_input')
+                ) if request.form.get('user_says_input') else '',
+            domain_id=current_user.current_domain_id)
         db.session.add(intent)
         try:
             db.session.commit()
@@ -41,7 +44,9 @@ def edit_intent(intent_id):
     intent = Intent.query.get_or_404(intent_id)
     if request.method == 'POST':
         intent.intent_name = request.form.get('intent_name')
-        intent.user_says = request.form.get('user_says')
+        intent.user_says = request.form.get('user_says') + (
+            ';' + request.form.get('user_says_input')
+            ) if request.form.get('user_says_input') else ''
         db.session.add(intent)
         try:
             db.session.commit()
