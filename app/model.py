@@ -152,8 +152,7 @@ class Intent(db.Model):
     created_timestamp = db.Column(DateTime, default=datetime.utcnow)
     updated_timestamp = db.Column(DateTime, default=datetime.utcnow)
     user_says_examples = db.relationship('UserSaysExample', backref='intent',
-                                         lazy=True,
-                                         cascade='all, delete-orphan')
+                                         lazy=True)
     domain_id = db.Column(Integer, ForeignKey('domains.id'), nullable=False)
 
     def __repr__(self):
@@ -182,6 +181,17 @@ class UserSaysExample(db.Model):
     entities = db.relationship('UserSaysExampleEntityAssociation',
                                back_populates='user_says_example',
                                lazy=True, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return '<UserSaysExample: %r, intent_id: %r, content: %r>' \
+            % (self.id, self.intent_id, self.content)
+
+    def to_json(self):
+        return {
+            'exampleID': self.id,
+            'content': self.content,
+            'intentId': self.intent_id
+        }
 
 
 class Entity(db.Model):

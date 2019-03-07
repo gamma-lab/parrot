@@ -14,3 +14,4 @@ from . import actions
 from . import stories
 from . import intents
 from . import story_lines
+from . import user_says_examples

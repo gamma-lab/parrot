@@ -1,6 +1,7 @@
+import re
 from flask import render_template, redirect, url_for, request
 from flask_login import current_user
-from ...model import Intent
+from ...model import Intent, UserSaysExample
 from . import intent
 from ... import db
 
@@ -24,10 +25,14 @@ def add_intent():
     if request.method == 'POST':
         intent = Intent(
             intent_name=request.form.get('intent_name'),
-            user_says=request.form.get('user_says') + (
-                ';' + request.form.get('user_says_input')
-                ) if request.form.get('user_says_input') else '',
             domain_id=current_user.current_domain_id)
+        for example_id in request.form.get('examples')[1:-1].split(';'):
+            example = UserSaysExample.query.get(example_id)
+            if example:
+                intent.user_says_examples.append(example)
+        if request.form.get('user_says_input'):
+            intent.user_says_examples.append(
+                UserSaysExample(content=request.form.get('user_says_input')))
         db.session.add(intent)
         try:
             db.session.commit()
@@ -44,9 +49,14 @@ def edit_intent(intent_id):
     intent = Intent.query.get_or_404(intent_id)
     if request.method == 'POST':
         intent.intent_name = request.form.get('intent_name')
-        intent.user_says = request.form.get('user_says') + (
-            ';' + request.form.get('user_says_input')
-            ) if request.form.get('user_says_input') else ''
+        intent.user_says_examples = []
+        for example_id in request.form.get('examples')[1:-1].split(';'):
+            example = UserSaysExample.query.get(example_id)
+            if example:
+                intent.user_says_examples.append(example)
+        if request.form.get('user_says_input'):
+            intent.user_says_examples.append(
+                UserSaysExample(content=request.form.get('user_says_input')))
         db.session.add(intent)
         try:
             db.session.commit()
