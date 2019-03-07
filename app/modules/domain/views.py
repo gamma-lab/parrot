@@ -2,7 +2,7 @@ import os
 import json
 from flask import request, render_template, redirect, url_for
 from flask_login import current_user
-from ...model import Domain, Intent, Action, Story, StoryLine
+from ...model import Domain, Intent, Action, Story, StoryLine, UserSaysExample
 from . import domain
 from ... import db
 
@@ -53,8 +53,10 @@ def add_default_domain():
                      'default_domain.json')) as f:
         data = json.load(f)
         for _intent in data['intents']:
-            intent = Intent(intent_name=_intent['intent_name'],
-                            user_says=';'.join(_intent['user_says']))
+            intent = Intent(intent_name=_intent['intent_name'])
+            for _example in _intent['user_says']:
+                example = UserSaysExample(content=_example)
+                intent.user_says_examples.append(example)
             domain.intents.append(intent)
         for _action in data['actions']:
             action = Action(

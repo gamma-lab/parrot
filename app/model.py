@@ -61,11 +61,11 @@ class Domain(db.Model):
     updated_timestamp = db.Column(DateTime, default=datetime.utcnow)
     user_id = db.Column(Integer, ForeignKey('users.id'), nullable=False)
     stories = db.relationship('Story', backref='domain', lazy=True,
-                              cascade="all, delete-orphan")
+                              cascade='all, delete-orphan')
     intents = db.relationship('Intent', backref='domain', lazy=True,
-                              cascade="all, delete-orphan")
+                              cascade='all, delete-orphan')
     actions = db.relationship('Action', backref='domain', lazy=True,
-                              cascade="all, delete-orphan")
+                              cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<Domain: %r, domain_name: %r>' \
@@ -114,7 +114,7 @@ class Story(db.Model):
     updated_timestamp = db.Column(DateTime, default=datetime.utcnow)
     domain_id = db.Column(Integer, ForeignKey('domains.id'), nullable=False)
     story_lines = db.relationship('StoryLine', backref='story', lazy='dynamic',
-                                  cascade="all, delete-orphan")
+                                  cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<Story: %r, story_name: %r>' \
@@ -134,12 +134,14 @@ class Story(db.Model):
     @property
     def actions(self):
         return set([
-            story_line for story_line in self.story_lines for action in story_line.actions])
+            story_line for story_line in self.story_lines for
+            action in story_line.actions])
 
     @property
     def intents(self):
         return set([
-            story_line for story_line in self.story_lines for intent in story_line.intent])
+            story_line for story_line in self.story_lines for
+            intent in story_line.intent])
 
 
 class Intent(db.Model):
@@ -147,9 +149,10 @@ class Intent(db.Model):
 
     id = db.Column(Integer, primary_key=True, index=True)
     intent_name = db.Column(String(64), nullable=False)
-    user_says = db.Column(Text, default='')
     created_timestamp = db.Column(DateTime, default=datetime.utcnow)
     updated_timestamp = db.Column(DateTime, default=datetime.utcnow)
+    user_says_examples = db.relationship('UserSaysExample', backref='intent',
+                                         lazy=True)
     domain_id = db.Column(Integer, ForeignKey('domains.id'), nullable=False)
 
     def __repr__(self):
@@ -157,12 +160,65 @@ class Intent(db.Model):
             % (self.id, self.intent_name)
 
     def to_json(self):
+        user_says_examples = [
+            user_says_example.to_json() for
+            user_says_example in self.user_says_examples
+        ]
         return {
             'intentId': self.id,
             'intentName': self.intent_name,
             'domainId': self.domain_id,
-            'userSays': self.user_says
+            'user_says_examples': user_says_examples
         }
+
+
+class UserSaysExample(db.Model):
+    __tablename__ = 'user_says_examples'
+
+    id = db.Column(Integer, primary_key=True, index=True)
+    content = db.Column(Text, default='')
+    intent_id = db.Column(Integer, ForeignKey('intents.id'))
+    entities = db.relationship('UserSaysExampleEntityAssociation',
+                               back_populates='user_says_example',
+                               lazy=True, cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return '<UserSaysExample: %r, intent_id: %r, content: %r>' \
+            % (self.id, self.intent_id, self.content)
+
+    def to_json(self):
+        return {
+            'exampleID': self.id,
+            'content': self.content,
+            'intentId': self.intent_id
+        }
+
+
+class Entity(db.Model):
+    __tablename__ = 'entities'
+
+    id = db.Column(Integer, primary_key=True, index=True)
+    entity_name = db.Column(String(64), nullable=False)
+    domain_id = db.Column(Integer, ForeignKey('domains.id'), nullable=False)
+    user_says_examples = db.relationship('UserSaysExampleEntityAssociation',
+                                         back_populates='entity',
+                                         lazy=True,
+                                         cascade='all, delete-orphan')
+
+
+class UserSaysExampleEntityAssociation(db.Model):
+    __tablename__ = 'user_says_examples_entities_association'
+
+    id = db.Column(Integer, primary_key=True, index=True)
+    value = db.Column(Text, default='')
+    start_index = db.Column(Integer)
+    end_index = db.Column(Integer)
+    entity_id = db.Column(Integer, ForeignKey('entities.id'))
+    user_says_example_id = db.Column(Integer,
+                                     ForeignKey('user_says_examples.id'))
+    entity = db.relationship('Entity', back_populates='user_says_examples')
+    user_says_example = db.relationship('UserSaysExample',
+                                        back_populates='entities')
 
 
 class Action(db.Model):

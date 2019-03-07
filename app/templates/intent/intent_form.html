@@ -21,7 +21,6 @@
                     <label class="col-sm-2 label-on-left">Intent Name</label>
                     <div class="col-sm-7">
                         <div class="form-group label-floating">
-                            <label class="control-label"></label>
                             <input class="form-control"
                                 type="text"
                                 name="intent_name"
@@ -37,15 +36,40 @@
                     <label class="col-sm-2 label-on-left">User Says</label>
                     <div class="col-sm-7">
                         <div class="form-group label-floating">
-                            <label class="control-label"></label>
                             <input class="form-control"
                                 type="text"
                                 name="user_says_input"
                                 placeholder='Input the sentence and press "Enter" to save'
                             />
-                            <input type="hidden" id="user_says" name="user_says" value="{% if intent %}{{ intent.user_says }}{% endif %}"/>
                         </div>
                     </div>
+                    <input type="hidden" name="examples" id="examples" value=";{% if intent %}{{ intent.user_says_examples | map(attribute='id') | join(';') }};{% endif %}">
+                </div>
+                <div class="row">
+                  <!-- <label class="col-sm-2 label-on-left">Examples</label> -->
+                  <div class="col-sm-7 col-sm-offset-2 example-list">
+                    {% if intent %}
+                    {% for example in intent.user_says_examples %}
+                    <div class="example-box" data-example-id="{{example.id}}">
+                      <div class="col-sm-10">
+                        <div class="form-group label-floating">
+                            <div class="form-control example-content" contenteditable>
+                              {{example.content}}
+                            </div>
+                        </div>
+                      </div>
+                      <div class="col-sm-2">
+                        <button type="button" class="btn btn-primary btn-round btn-fab btn-fab-mini button-margin update-example">
+                          <i class="material-icons">save</i>
+                        </button>
+                        <button type="button" class="btn btn-danger btn-round btn-fab btn-fab-mini button-margin delete-example">
+                          <i class="material-icons">delete</i>
+                        </button>
+                      </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                  </div>
                 </div>
             </div>
 
@@ -61,7 +85,25 @@
 {% block scripts %}
   {{ super() }}
   <script type="text/javascript">
-
+    var example_template = `
+    <div class="example-box" data-example-id="_example_id_">
+      <div class="col-sm-10">
+        <div class="form-group label-floating">
+            <div class="form-control example-content" contenteditable>
+              _content_
+            </div>
+        </div>
+      </div>
+      <div class="col-sm-2">
+        <button type="button" class="btn btn-primary btn-round btn-fab btn-fab-mini button-margin update-example">
+          <i class="material-icons">save</i>
+        </button>
+        <button type="button" class="btn btn-danger btn-round btn-fab btn-fab-mini button-margin delete-example">
+          <i class="material-icons">delete</i>
+        </button>
+      </div>
+    </div>
+    `;
     function setFormValidation(id){
       $(id).validate({
         errorPlacement: function(error, element) {
@@ -70,30 +112,82 @@
       });
     }
 
+    function add_example(content, cb) {
+      $.ajax({
+        type: 'POST',
+        url: '/api/user_says_examples',
+        data: JSON.stringify({ content: content }),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        success: cb
+      });
+    }
+
+    function update_example(example_id, content, cb) {
+      $.ajax({
+        type: 'PUT',
+        url: '/api/user_says_examples/' + example_id,
+        data: JSON.stringify({ content: content }),
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        success: cb
+      });
+    }
+
+    function delete_example(example_id, cb) {
+      $.ajax({
+        type: 'DELETE',
+        url: '/api/user_says_examples/' + example_id,
+        success: cb
+      });
+    }
+
     $(document).ready(function(){
       setFormValidation('#intent-form');
-    });
 
-    $('#intent-form input').keydown(function (e) {
-      if (e.keyCode == 13) {
-          e.preventDefault();
-          console.log(e.target.value);
-          if (e.target.name == 'user_says_input') {
-            // save to tags
-            $('#user_says').tagsinput('add', e.target.value);
-            e.target.value = '';
-          }
-          return false;
-      }
-    });
+      $('.example-list').on('click', '.delete-example', function(e) {
+        var example_box = $(this).parent().parent();
+        delete_example(example_box.data('example-id'), function(data) {
+          // update examples
+          example_box.remove();
+          // update examples
+          $('#examples').val(
+            $('#examples').val().replace(';' + example_box.data('example-id') + ';', ';')
+          );
+        });
+      });
 
-    $('#user_says').tagsinput({
-      trimValue: true,
-      allowDuplicates: false,
-      confirmKeys: [13],
-      delimiter: ';',
-      tagClass: 'sentence',
-      splitOn: ';'
+      $('.example-list').on('click', '.update-example', function(e) {
+        var example_box = $(this).parent().parent();
+        update_example(
+          example_box.data('example-id'),
+          $.trim(example_box.find('.example-content').html()),
+          function(data) {
+            //
+          });
+      });
+
+      $('#intent-form input').keydown(function (e) {
+        if (e.keyCode == 13) {
+            e.preventDefault();
+            console.log(e.target.value);
+            if (e.target.name == 'user_says_input' && e.target.value) {
+              // save to tags
+              add_example(e.target.value, function(data) {
+                console.log(data);
+                $('.example-list').append(
+                  example_template.replace(
+                    '_example_id_', data.exampleID).replace(
+                      '_content_', data.content)
+                );
+                $('#examples').val($('#examples').val() + data.exampleID + ';');
+              });
+              e.target.value = '';
+            } else {
+              return false;
+            }
+        }
+      });
     });
   </script>
 {% endblock %}
