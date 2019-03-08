@@ -11,3 +11,7 @@ Parrot is an intelligent conversation engineering tool.
   ```
 - Initialize sqlite database `flask init-db`
 - Run `flask run` and go to http://127.0.0.1:5000/ to use Parrot
+
+## Update Database
+
+- Run `flask db upgrade` if the new models have been added.
