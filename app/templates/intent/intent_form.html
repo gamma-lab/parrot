@@ -93,6 +93,9 @@
       										<option value="{{ entity.id }}" style="background-color: {{ entity.color_hex }};">{{ entity.entity_name }}</option>
                           {% endfor %}
       									</select>
+                        {% if entities | length == 0 %}
+                          <a href="#">Create new entity</a>
+                        {% endif %}
                       </div>
                       <input type="hidden" name="user-says-example-id" value="">
                       <input type="hidden" name="start-index" value="">
