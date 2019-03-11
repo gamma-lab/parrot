@@ -66,6 +66,8 @@ class Domain(db.Model):
                               cascade='all, delete-orphan')
     actions = db.relationship('Action', backref='domain', lazy=True,
                               cascade='all, delete-orphan')
+    entities = db.relationship('Entity', backref='domain', lazy=True,
+                               cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<Domain: %r, domain_name: %r>' \
@@ -180,18 +182,110 @@ class UserSaysExample(db.Model):
     intent_id = db.Column(Integer, ForeignKey('intents.id'))
     entities = db.relationship('UserSaysExampleEntityAssociation',
                                back_populates='user_says_example',
-                               lazy=True, cascade='all, delete-orphan')
+                               lazy='dynamic', cascade='all, delete-orphan')
 
     def __repr__(self):
         return '<UserSaysExample: %r, intent_id: %r, content: %r>' \
             % (self.id, self.intent_id, self.content)
 
     def to_json(self):
+        entities = [entity.to_json() for entity in self.entities]
         return {
             'exampleID': self.id,
             'content': self.content,
-            'intentId': self.intent_id
+            'intentId': self.intent_id,
+            'entities': entities
         }
+
+    @property
+    def content_entities(self):
+        content = self.content
+        entities = self.entities.order_by(
+            UserSaysExampleEntityAssociation.start_index.asc()).all()
+        if len(entities) == 0:
+            return content
+        content_substrings = []
+        for entity_index in range(len(entities)):
+            if entity_index == 0:
+                # annotation the first word in the sentence
+                if entities[entity_index].start_index == 0:
+                    content_substrings.append(
+                        '<span class="annotation" data-entity-id="{}"'
+                        'data-start-index="{}" data-end-index="{}"'
+                        'data-user-says-example-id="{}"'
+                        'data-annotation-id="{}"'
+                        'style="background-color:{};">{}</span>'.format(
+                            entities[entity_index].entity_id,
+                            entities[entity_index].start_index,
+                            entities[entity_index].end_index,
+                            self.id,
+                            entities[entity_index].id,
+                            entities[entity_index].entity.color_hex,
+                            content[:entities[entity_index].end_index]
+                        ))
+                else:
+                    content_substrings.extend([
+                        content[:entities[entity_index].start_index],
+                        '<span class="annotation" data-entity-id="{}"'
+                        'data-start-index="{}" data-end-index="{}"'
+                        'data-user-says-example-id="{}"'
+                        'data-annotation-id="{}"'
+                        'style="background-color:{};">{}</span>'.format(
+                            entities[entity_index].entity_id,
+                            entities[entity_index].start_index,
+                            entities[entity_index].end_index,
+                            self.id,
+                            entities[entity_index].id,
+                            entities[entity_index].entity.color_hex,
+                            content[entities[entity_index].start_index:entities[entity_index].end_index]
+                        )
+                    ])
+            else:
+                if entities[entity_index - 1].end_index == entities[entity_index].start_index:
+                    # no gap between two annotations
+                    content_substrings.append(
+                        '<span class="annotation" data-entity-id="{}"'
+                        'data-start-index="{}" data-end-index="{}"'
+                        'data-user-says-example-id="{}"'
+                        'data-annotation-id="{}"'
+                        'style="background-color:{};">{}</span>'.format(
+                            entities[entity_index].entity_id,
+                            entities[entity_index].start_index,
+                            entities[entity_index].end_index,
+                            self.id,
+                            entities[entity_index].id,
+                            entities[entity_index].entity.color_hex,
+                            content[entities[entity_index].start_index:entities[entity_index].end_index]
+                        )
+                        # '<span class="annotation" data-entity-id="' +
+                        # str(entities[entity_index].entity_id) +
+                        # '" style="background-color:' +
+                        # entities[entity_index].entity.color_hex + ';">' +
+                        # content[entities[entity_index].start_index:entities[entity_index].end_index]
+                        # + '</span>'
+                    )
+                else:
+                    content_substrings.extend([
+                        content[entities[entity_index - 1].end_index:entities[entity_index].start_index],
+                        '<span class="annotation" data-entity-id="{}"'
+                        'data-start-index="{}" data-end-index="{}"'
+                        'data-user-says-example-id="{}"'
+                        'data-annotation-id="{}"'
+                        'style="background-color:{};">{}</span>'.format(
+                            entities[entity_index].entity_id,
+                            entities[entity_index].start_index,
+                            entities[entity_index].end_index,
+                            self.id,
+                            entities[entity_index].id,
+                            entities[entity_index].entity.color_hex,
+                            content[entities[entity_index].start_index:entities[entity_index].end_index]
+                        )
+                    ])
+            if entity_index == len(entities) - 1:
+                # last annotation
+                if entities[entity_index].end_index < len(content):
+                    content_substrings.append(content[entities[entity_index].end_index:])
+        return ''.join(content_substrings)
 
 
 class Entity(db.Model):
@@ -199,11 +293,16 @@ class Entity(db.Model):
 
     id = db.Column(Integer, primary_key=True, index=True)
     entity_name = db.Column(String(64), nullable=False)
+    color_hex = db.Column(String(16))
     domain_id = db.Column(Integer, ForeignKey('domains.id'), nullable=False)
     user_says_examples = db.relationship('UserSaysExampleEntityAssociation',
                                          back_populates='entity',
                                          lazy=True,
                                          cascade='all, delete-orphan')
+
+    def __repr__(self):
+        return '<Entity: %r, entity_name: %r>' \
+            % (self.id, self.entity_name)
 
 
 class UserSaysExampleEntityAssociation(db.Model):
@@ -219,6 +318,25 @@ class UserSaysExampleEntityAssociation(db.Model):
     entity = db.relationship('Entity', back_populates='user_says_examples')
     user_says_example = db.relationship('UserSaysExample',
                                         back_populates='entities')
+
+    def __repr__(self):
+        return '<UserSaysExampleEntityAssociation: %r, value: %r>' \
+            % (self.id, self.value)
+
+    def to_json(self):
+        return {
+            'id': self.id,
+            'value': self.value,
+            'startIndex': self.start_index,
+            'endIndex': self.end_index,
+            'userSaysExampleId': self.user_says_example_id,
+            'entityId': self.entity_id
+        }
+
+    def annotated_content(self):
+        return {
+            'annotated_content': self.user_says_example.content_entities
+        }
 
 
 class Action(db.Model):

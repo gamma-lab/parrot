@@ -5106,7 +5106,7 @@ h2.title {
   font-size: 10px; }
 .btn.btn-just-icon, .navbar .navbar-nav > li > a.btn.btn-just-icon {
   font-size: 20px;
-  padding: 11px 11px;
+  padding: 0px 0px;
   line-height: 1em; }
 .btn.btn-just-icon i, .navbar .navbar-nav > li > a.btn.btn-just-icon i {
   width: 20px; }
@@ -7070,7 +7070,7 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
   padding: 20px 0; }
 
 .modal-content {
-  box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 40px 77px 0 rgba(0, 0, 0, 0.22);
+  /* box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 40px 77px 0 rgba(0, 0, 0, 0.22); */
   border-radius: 6px;
   border: none; }
 .modal-content .modal-header {
@@ -7080,7 +7080,7 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
   padding-bottom: 0;
   padding-left: 24px; }
 .modal-content .modal-body {
-  padding-top: 24px;
+  /* padding-top: 24px; */
   padding-right: 24px;
   padding-bottom: 16px;
   padding-left: 24px; }
@@ -7126,7 +7126,8 @@ fieldset[disabled] .form-group.is-focused .togglebutton label {
   width: 300px;
   margin: 0 auto; }
 .modal-small .modal-body {
-  margin-top: 20px; }
+  margin-top: 20px;
+}
 
 .navbar {
   border: 0;
@@ -8968,3 +8969,5 @@ p {
   margin-left: 30px; } */
 /* .button-margin {
   margin: 0px 15px !important; } */
+.modal-backdrop.in {
+  opacity: 0 !important ;}

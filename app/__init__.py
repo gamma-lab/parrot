@@ -52,8 +52,9 @@ def create_app(config_name='default'):
 
     @app.shell_context_processor
     def make_shell_context():
-        from .model import User, Domain, Action
-        return dict(app=app, db=db, User=User, Domain=Domain, Action=Action)
+        from .model import User, Domain, Action, Entity
+        return dict(app=app, db=db, User=User, Domain=Domain, Action=Action,
+                    Entity=Entity)
 
     @app.before_request
     def login():
