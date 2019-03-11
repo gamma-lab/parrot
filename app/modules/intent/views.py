@@ -40,7 +40,8 @@ def add_intent():
         except Exception as e:
             # add flash
             db.session.rollback()
-    return render_template('intent/intent_form.html', action='create')
+    return render_template('intent/intent_form.html', action='create',
+                           entities=current_user.current_domain.entities)
 
 
 @intent.route('/edit/<int:intent_id>', methods=['GET', 'POST'])
@@ -65,4 +66,5 @@ def edit_intent(intent_id):
             # add flash
             db.session.rollback()
     return render_template('intent/intent_form.html', action='edit',
+                           entities=intent.domain.entities,
                            intent=intent)
